@@ -1,34 +1,28 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 function App() {
-  const[toDo, setToDo] =  useState("");
-  const[toDos, setToDos] = useState([]);
-  const onChagne = (event) => setToDo(event.target.value);
-  console.log(toDo);
-  const onSubmit = (event) => {
-    event.preventDefault();
-    if(toDo === ""){
-      return
-    }
-    setToDos((currentArray) => [toDo, ...currentArray]); 
-    setToDo("");
-  };
-  console.log(toDos);
+  const [loading, setLoading] = useState(true);
+  const [coins, setConins] = useState([]);
+  useEffect(() => {
+    fetch("https://api.coinpaprika.com/v1/tickers")
+      .then(response => response.json())
+      .then((json) => {
+        setConins(json);
+        setLoading(false);
+      });
+    },  []);
   return (
     <div>
-      <h1>My To Dos : {toDos.length}</h1>
-      <form onSubmit={onSubmit}>
-       <input onChange={onChagne} value={toDo} type="text" placeholder="Wrtie your to do...."></input>
-       <button>Add to do..</button>
-      </form>
-      <hr/>
-      <ul>
-        {toDos.map((item, index) => 
-          <li key={index}>{item}</li>)}
-      </ul>
-
+      <h1>
+        The Coins! {loading ? "" :`(${coins.length})`}
+      </h1>
+      {loading ? <strong>Laoding...</strong> : 
+      <select>
+          {coins.map((coin) => (<option>{coin.name} ( {coin.symbol} ) : ${coin.quotes.USD.price} USD</option>))}
+      </select>}
+      
     </div>
   );
 }
